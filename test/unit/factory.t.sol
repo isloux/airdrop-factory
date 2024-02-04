@@ -12,12 +12,17 @@ contract FactoryTest is Test {
     address s_token;
     uint256 s_registrationFee;
     uint128 s_airdropTime;
+    address s_treasury;
 
     function setUp() external {
         DeployFactory deployFactory = new DeployFactory();
         HelperConfig helperConfig = new HelperConfig();
-        (s_token, s_airdropTime, s_registrationFee) = helperConfig.activeNetworkConfig();        
+        (s_token, s_airdropTime, s_registrationFee, s_treasury) = helperConfig.activeNetworkConfig();
         factory = deployFactory.run();
+    }
+
+    function testGetTreasury() public {
+        assertEq(factory.getTeasury(), s_treasury);
     }
 
     // How to check logs: https://book.getfoundry.sh/cheatcodes/get-recorded-logs?highlight=Vm.Log#examples

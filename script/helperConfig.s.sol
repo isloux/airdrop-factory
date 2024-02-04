@@ -9,11 +9,13 @@ contract HelperConfig is Script {
     NetworkConfig public activeNetworkConfig;
 
     uint256 public constant INITIAL_SUPPLY = 1000 ether;
+    address public TREASURY = makeAddr("treasury"); // not a constant
 
     struct NetworkConfig {
         address tokenAddress; // token address
         uint128 airdropTime;
         uint256 registrationFee;
+        address treasury;
     }
 
     constructor() {
@@ -31,7 +33,8 @@ contract HelperConfig is Script {
         NetworkConfig memory mumbaiConfig = NetworkConfig({
             tokenAddress: 0x0715A7794a1dc8e42615F059dD6e406A6594651A,
             airdropTime: uint128(block.timestamp) + 14 days,
-            registrationFee: 1 ether
+            registrationFee: 1 ether,
+            treasury: TREASURY
         });
         return mumbaiConfig;
     }
@@ -41,7 +44,8 @@ contract HelperConfig is Script {
         NetworkConfig memory fujiConfig = NetworkConfig({
             tokenAddress: 0x86d67c3D38D2bCeE722E601025C25a575021c6EA,
             airdropTime: uint128(block.timestamp) + 14 days,
-            registrationFee: 1 ether
+            registrationFee: 1 ether,
+            treasury: TREASURY
         });
         return fujiConfig;
     }
@@ -59,7 +63,8 @@ contract HelperConfig is Script {
         NetworkConfig memory anvilConfig = NetworkConfig({
             tokenAddress: address(token),
             airdropTime: uint128(block.timestamp) + 14 days,
-            registrationFee: 1 ether
+            registrationFee: 1 ether,
+            treasury: TREASURY
         });
         return anvilConfig;
     }
