@@ -52,6 +52,10 @@ contract AirdropTest is BaseSetup {
         _;
     }
 
+    function testOwner() public funded {
+        assertEq(airdrop.owner(), address(this));
+    }
+
     function testRegister() public registered {
         assertEq(airdrop.count(), 3);
     }
@@ -67,12 +71,15 @@ contract AirdropTest is BaseSetup {
     }
 
     function testRecoverFees() public registered {
-        uint256 ownerInitialBalance = msg.sender.balance;
-        vm.startBroadcast();
+        uint256 ownerInitialBalance = address(this).balance;
+        vm.prank(address(this));
         airdrop.withdrawPaidFees();
-        vm.stopBroadcast();
-        assertEq(msg.sender.balance - ownerInitialBalance, STARTING_BALANCE);        
+        assertEq(address(this).balance - ownerInitialBalance, STARTING_BALANCE);        
     }
+
+    // Have these functions to receive ether when withdrawing
+    fallback() external payable {}
+    receive() external payable {}
 
     function testTooEarlyAirdrop() public funded {
         vm.warp(block.timestamp + 3600);
@@ -114,10 +121,13 @@ contract AirdropTest is BaseSetup {
         vm.prank(bob);
         airdrop.sendAirdrop();
         assertEq(token.balanceOf(address(airdrop)), 0.1 ether); 
-        uint256 initialTokenBalance = token.balanceOf(msg.sender);
-        vm.startBroadcast();
+        uint256 initialTokenBalance = token.balanceOf(address(this));
+        vm.prank(address(this));
         airdrop.withdrawTokens();
-        vm.stopBroadcast();
-        assertEq(token.balanceOf(msg.sender) - initialTokenBalance, 0.1 ether);
+        assertEq(token.balanceOf(address(this)) - initialTokenBalance, 0.1 ether);
+    }
+
+    function testRegistrationFee() public {
+        assertEq(airdrop.getRegistrationFee(), MINIMUM_FEE);
     }
 }

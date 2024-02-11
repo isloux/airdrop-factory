@@ -13,6 +13,7 @@ contract DeployAirdrop is Script {
         (address token, uint128 airdropTime, uint256 registrationFee,) = helperConfig.activeNetworkConfig();
         vm.startBroadcast();
         Airdrop airdrop = new Airdrop(
+            msg.sender,
             token,
             airdropTime,
             registrationFee

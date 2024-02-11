@@ -17,6 +17,8 @@ interface IERC20 {
         returns (bool);
 
     function decimals() external view returns (uint8);
+
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
 contract Airdrop is Ownable {
@@ -25,24 +27,26 @@ contract Airdrop is Ownable {
     uint256 private immutable i_scale;
     uint256 private immutable i_registrationFee;
     address[] private s_recipients;
-    bool internal airdropSent;
+    bool private s_airdropSent;
 
     modifier onlyOnce() {
-        require(!airdropSent, "No");
-        airdropSent = true;
+        require(!s_airdropSent, "No");
+        s_airdropSent = true;
         _;
     }
 
     constructor(
+        address _owner,
         address _tokenContract,
         uint128 _airdropTime,
         uint256 _registrationFee
     ) Ownable(msg.sender) {
+        transferOwnership(_owner);
         require(_airdropTime > block.timestamp);
         i_token = IERC20(_tokenContract);
         i_airdropTime = _airdropTime;
         i_registrationFee = _registrationFee;
-        airdropSent = false;
+        s_airdropSent = false;
         uint8 decimals = i_token.decimals();
         i_scale = 10**(decimals - 1);
     }
@@ -90,17 +94,19 @@ contract Airdrop is Ownable {
     }
 
     function withdrawTokens() external onlyOwner {
-        require(airdropSent, "Airdrop must be sent out first.");
+        require(s_airdropSent, "Airdrop must be sent out first.");
         i_token.transfer(msg.sender, i_token.balanceOf(address(this)));
     }
 
     function withdrawPaidFees() external onlyOwner {
-        address payable owner_address;
-        owner_address = payable(msg.sender);
-        owner_address.transfer(address(this).balance);
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function getAirdropTime() external view returns (uint128) {
         return i_airdropTime;
+    }
+
+    function getRegistrationFee() external view returns (uint256) {
+        return i_registrationFee;
     }
 }
