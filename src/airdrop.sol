@@ -1,7 +1,7 @@
 pragma solidity 0.8.23;
 // SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IERC20 {
     function transferFrom(
@@ -108,5 +108,9 @@ contract Airdrop is Ownable {
 
     function getRegistrationFee() external view returns (uint256) {
         return i_registrationFee;
+    }
+
+    function airdropSent() external view returns (bool) {
+        return s_airdropSent;
     }
 }

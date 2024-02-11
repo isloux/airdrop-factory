@@ -34,7 +34,7 @@ contract Factory is Database {
         emit ContractDeployed(address(newContract));
 
         // Write relevant data in the database
-        addAirdrop(address(newContract), _tokenContract, _airdropTime, _registrationFee, _logoUrl);
+        addAirdrop(msg.sender, address(newContract), _tokenContract, _airdropTime, _registrationFee, _logoUrl);
     }
 
     function updateFee(uint256 _fee) external onlyOwner {
