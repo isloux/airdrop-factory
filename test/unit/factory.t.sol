@@ -10,6 +10,10 @@ import {HelperConfig} from "../../script/helperConfig.s.sol";
 
 interface IAirdrop {
     function owner() external view returns (address);
+    function sendAirdrop() external;
+    function withdrawPaidFees() external;
+    function register() external payable;
+    function getToken() external view returns (IERC20);
 }
 
 contract FactoryTest is BaseSetup {
@@ -17,7 +21,7 @@ contract FactoryTest is BaseSetup {
     address private s_token;
     address private s_droppedToken;
     uint256 public constant REGISTRATION_FEE = 0.1 ether;
-    uint128 public constant AIRDROP_TIME = 1707752147;
+    uint128 public AIRDROP_TIME = uint128(block.timestamp) + 14 days;
     string public constant LOGO_URL = "https://www.pinkswap.finance/pinkswap.png";
     address private s_treasury;
 
@@ -41,6 +45,15 @@ contract FactoryTest is BaseSetup {
     modifier fromAlice() {
         deal(s_token, alice, 2 ether);
         deal(alice, 1 ether);
+        _;
+    }
+
+    modifier fromAliceAndBob() {
+        deal(s_token, alice, 2 ether);
+        deal(s_droppedToken, alice, 1 ether);
+        deal(alice, 1 ether);
+        deal(s_token, bob, 2 ether);
+        deal(bob, 1 ether);
         _;
     }
 
@@ -76,6 +89,44 @@ contract FactoryTest is BaseSetup {
         assertEq(entries[4].topics[0], keccak256("ContractDeployed(address)"));
         IAirdrop airdrop = IAirdrop(factory.getContract(0));
         assertEq(airdrop.owner(), alice);
+        assertEq(factory.getNumberOfAirdrops(), 1);
+    }
+
+    function testCannotCreateTwoAirdrops() public fromAliceAndBob {
+        IERC20 factoryFeeToken = IERC20(s_token);
+        vm.startPrank(alice);
+        factoryFeeToken.approve(address(factory), factory.getFee());
+        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        vm.stopPrank();
+        vm.startPrank(bob);
+        factoryFeeToken.approve(address(factory), factory.getFee() * 2);
+        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        vm.expectRevert();
+        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        vm.stopPrank();
+    }
+
+    function testRemoveAirdrop() public fromAliceAndBob {
+        IERC20 factoryFeeToken = IERC20(s_token);
+        vm.startPrank(alice);
+        factoryFeeToken.approve(address(factory), factory.getFee());
+        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        vm.stopPrank();
+        IAirdrop airdrop = IAirdrop(factory.getContract(0));
+        IERC20 dropped = IERC20(s_droppedToken);
+        vm.startPrank(alice);
+        dropped.transfer(address(airdrop), 1 ether); // Here this is the airdropped token
+        assertEq(dropped.balanceOf(address(airdrop)), 1 ether);
+        airdrop.register{value: 0.1 ether}();
+        vm.stopPrank();
+        vm.warp(block.timestamp + 18 days);
+        vm.prank(alice);
+        airdrop.withdrawPaidFees();
+        assertEq(dropped.balanceOf(address(airdrop)), 1 ether);
+        assertEq(address(airdrop).balance, 0);
+        assertEq(address(airdrop.getToken()), s_droppedToken);
+        vm.prank(bob);
+        airdrop.sendAirdrop(); // Not working
     }
 
     function testFactoryOwner() public {

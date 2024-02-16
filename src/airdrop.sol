@@ -99,7 +99,9 @@ contract Airdrop is Ownable {
     }
 
     function withdrawPaidFees() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No fees to withdraw");
+        payable(msg.sender).transfer(balance);
     }
 
     function getAirdropTime() external view returns (uint128) {

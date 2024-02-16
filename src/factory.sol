@@ -26,6 +26,7 @@ contract Factory is Database {
         uint256 _registrationFee,
         string memory _logoUrl
     ) external {
+        require(s_fromOwner[msg.sender] == 0, "Only one airdrop at a time");
         require(i_token.transferFrom(msg.sender, i_treasury, s_factoryFee), "Transfer failed");
         // Deploying a new instance of MyContract
         Airdrop newContract = new Airdrop(msg.sender, _tokenContract, _airdropTime, _registrationFee);
@@ -49,7 +50,7 @@ contract Factory is Database {
         return s_factoryFee;
     }
 
-    function getFeeToken() external view returns(address) {
+    function getFeeToken() external view returns (address) {
         return address(i_token);
     }
 }

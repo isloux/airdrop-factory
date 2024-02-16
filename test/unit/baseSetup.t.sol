@@ -9,7 +9,9 @@ contract Utils {
         uint16 _numberOfUsers
     ) public pure returns (address[] memory) {
         address[] memory users = new address[](_numberOfUsers);
-        for (uint160 i = 0; i < _numberOfUsers; i++) users[i] = address(i + 1);
+        // User addresses start at 0x10 because of the pre-compiled registry
+        // See https://book.getfoundry.sh/misc/precompile-registry
+        for (uint160 i = 0; i < _numberOfUsers; i++) users[i] = address(i + 10);
         return users;
     }
 }
