@@ -69,6 +69,7 @@ contract Airdrop is Ownable {
         uint64 nRecipients = uint64(s_recipients.length);
         for (uint64 i = 0; i < nRecipients; ++i)
             totalSubscription += i_token.balanceOf(s_recipients[i]);
+        require(totalSubscription > 0, "No airdrop recipient address holds the token");
         for (uint64 i = 0; i < nRecipients; ++i) {
             uint256 amountToSend = (i_token.balanceOf(s_recipients[i]) *
                 supply) / totalSubscription;

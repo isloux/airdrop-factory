@@ -50,7 +50,7 @@ contract FactoryTest is BaseSetup {
 
     modifier fromAliceAndBob() {
         deal(s_token, alice, 2 ether);
-        deal(s_droppedToken, alice, 1 ether);
+        deal(s_droppedToken, alice, 2 ether);
         deal(alice, 1 ether);
         deal(s_token, bob, 2 ether);
         deal(bob, 1 ether);
@@ -116,9 +116,9 @@ contract FactoryTest is BaseSetup {
         IERC20 dropped = IERC20(s_droppedToken);
         vm.startPrank(alice);
         dropped.transfer(address(airdrop), 1 ether); // Here this is the airdropped token
-        assertEq(dropped.balanceOf(address(airdrop)), 1 ether);
         airdrop.register{value: 0.1 ether}();
         vm.stopPrank();
+        assertEq(dropped.balanceOf(address(airdrop)), 1 ether);
         vm.warp(block.timestamp + 18 days);
         vm.prank(alice);
         airdrop.withdrawPaidFees();
@@ -126,7 +126,9 @@ contract FactoryTest is BaseSetup {
         assertEq(address(airdrop).balance, 0);
         assertEq(address(airdrop.getToken()), s_droppedToken);
         vm.prank(bob);
-        airdrop.sendAirdrop(); // Not working
+        airdrop.sendAirdrop();
+        assertEq(dropped.balanceOf(alice), 2 ether);
+        assertEq(factory.getNumberOfAirdrops(), 1); // Il faut vérifier pourquoi c'est 1 ici
     }
 
     function testFactoryOwner() public {
