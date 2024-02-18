@@ -23,6 +23,8 @@ contract HelperConfig is Script {
             activeNetworkConfig = getMumbaiEthConfig();
         } else if (block.chainid == 43113) {
             activeNetworkConfig = getFujiEthConfig();
+        } else if (block.chainid == 1287) {
+            activeNetworkConfig = getMoonbaseEthConfig();
         } else {
             activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
@@ -46,6 +48,17 @@ contract HelperConfig is Script {
             airdropTime: uint128(block.timestamp) + 14 days,
             registrationFee: 1 ether,
             treasury: TREASURY
+        });
+        return fujiConfig;
+    }
+
+    function getMoonbaseEthConfig() public view returns (NetworkConfig memory) {
+        // token address
+        NetworkConfig memory fujiConfig = NetworkConfig({
+            tokenAddress: 0xbF452599F041330266f2C302604F9E0c6D980E92,
+            airdropTime: uint128(block.timestamp) + 2 hours,
+            registrationFee: 0.01 ether,
+            treasury: 0xc096a34cFC2094D360373CC631eB28f353F4498e
         });
         return fujiConfig;
     }
