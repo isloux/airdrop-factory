@@ -12,9 +12,10 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
-    function transfer(address recipient, uint256 amount)
-        external
-        returns (bool);
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
     function decimals() external view returns (uint8);
 
@@ -48,7 +49,7 @@ contract Airdrop is Ownable {
         i_registrationFee = _registrationFee;
         s_airdropSent = false;
         uint8 decimals = i_token.decimals();
-        i_scale = 10**(decimals - 1);
+        i_scale = 10 ** (decimals - 1);
     }
 
     function receiveTokens(uint256 amount) external {
@@ -69,7 +70,10 @@ contract Airdrop is Ownable {
         uint64 nRecipients = uint64(s_recipients.length);
         for (uint64 i = 0; i < nRecipients; ++i)
             totalSubscription += i_token.balanceOf(s_recipients[i]);
-        require(totalSubscription > 0, "No airdrop recipient address holds the token");
+        require(
+            totalSubscription > 0,
+            "No airdrop recipient address holds the token"
+        );
         for (uint64 i = 0; i < nRecipients; ++i) {
             uint256 amountToSend = (i_token.balanceOf(s_recipients[i]) *
                 supply) / totalSubscription;
@@ -80,6 +84,12 @@ contract Airdrop is Ownable {
     function register() external payable {
         require(msg.value >= i_registrationFee, "Insufficient payment");
         s_recipients.push(msg.sender);
+    }
+
+    function register(address[] calldata _addresses) external onlyOwner {
+        uint64 nAddresses = uint64(_addresses.length);
+        for (uint64 i = 0; i < nAddresses; i++)
+            s_recipients.push(_addresses[i]);
     }
 
     function count() external view returns (uint256) {

@@ -68,9 +68,7 @@ contract HelperConfig is Script {
             return activeNetworkConfig;
         }
         vm.startBroadcast();
-        DummyToken token = new DummyToken(
-            INITIAL_SUPPLY
-        );
+        DummyToken token = new DummyToken(INITIAL_SUPPLY);
         vm.stopBroadcast();
 
         NetworkConfig memory anvilConfig = NetworkConfig({

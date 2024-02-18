@@ -18,7 +18,7 @@ struct AirdropData {
 
 contract Database is Ownable {
     AirdropData[] internal s_airdrops;
-    mapping (address=>uint64) internal s_fromOwner;
+    mapping(address => uint64) internal s_fromOwner;
 
     constructor() Ownable(msg.sender) {}
 
@@ -49,7 +49,10 @@ contract Database is Ownable {
     }
 
     function removeAirdrop() external {
-        require(address(this).balance == 0, "Paid fees must be withdrawn first");
+        require(
+            address(this).balance == 0,
+            "Paid fees must be withdrawn first"
+        );
         uint64 contractIndex = s_fromOwner[msg.sender];
         require(contractIndex != 0, "No airdrop contract found");
         uint64 nAirdrops = uint64(s_airdrops.length);
@@ -61,6 +64,6 @@ contract Database is Ownable {
         // Remove data from database
         for (uint64 i = contractIndex; i < nAirdrops - 1; ++i)
             s_airdrops[i] = s_airdrops[i + 1];
-        s_airdrops.pop();   
+        s_airdrops.pop();
     }
 }

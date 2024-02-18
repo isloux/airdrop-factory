@@ -13,7 +13,11 @@ contract Factory is Database {
     address private immutable i_treasury;
     uint256 private s_factoryFee;
 
-    constructor(address _feeTokenAddress, uint256 _fee, address _treasury) Database() {
+    constructor(
+        address _feeTokenAddress,
+        uint256 _fee,
+        address _treasury
+    ) Database() {
         i_token = IERC20(_feeTokenAddress);
         s_factoryFee = _fee;
         i_treasury = _treasury;
@@ -27,15 +31,30 @@ contract Factory is Database {
         string memory _logoUrl
     ) external {
         require(s_fromOwner[msg.sender] == 0, "Only one airdrop at a time");
-        require(i_token.transferFrom(msg.sender, i_treasury, s_factoryFee), "Transfer failed");
+        require(
+            i_token.transferFrom(msg.sender, i_treasury, s_factoryFee),
+            "Transfer failed"
+        );
         // Deploying a new instance of MyContract
-        Airdrop newContract = new Airdrop(msg.sender, _tokenContract, _airdropTime, _registrationFee);
+        Airdrop newContract = new Airdrop(
+            msg.sender,
+            _tokenContract,
+            _airdropTime,
+            _registrationFee
+        );
 
         // Emit an event with the address of the newly deployed contract
         emit ContractDeployed(address(newContract));
 
         // Write relevant data in the database
-        addAirdrop(msg.sender, address(newContract), _tokenContract, _airdropTime, _registrationFee, _logoUrl);
+        addAirdrop(
+            msg.sender,
+            address(newContract),
+            _tokenContract,
+            _airdropTime,
+            _registrationFee,
+            _logoUrl
+        );
     }
 
     function updateFee(uint256 _fee) external onlyOwner {

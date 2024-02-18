@@ -14,6 +14,7 @@ interface IAirdrop {
     function withdrawPaidFees() external;
     function register() external payable;
     function getToken() external view returns (IERC20);
+    function getAirdropTime() external view returns (uint128);
 }
 
 contract FactoryTest is BaseSetup {
@@ -22,13 +23,14 @@ contract FactoryTest is BaseSetup {
     address private s_droppedToken;
     uint256 public constant REGISTRATION_FEE = 0.1 ether;
     uint128 public AIRDROP_TIME = uint128(block.timestamp) + 14 days;
-    string public constant LOGO_URL = "https://www.pinkswap.finance/pinkswap.png";
+    string public constant LOGO_URL =
+        "https://www.pinkswap.finance/pinkswap.png";
     address private s_treasury;
 
     function setUp() external {
         DeployFactory deployFactory = new DeployFactory();
         HelperConfig helperConfig = new HelperConfig();
-        (s_droppedToken,,,s_treasury) = helperConfig.activeNetworkConfig();
+        (s_droppedToken, , , s_treasury) = helperConfig.activeNetworkConfig();
         factory = deployFactory.run();
         s_token = factory.getFeeToken();
     }
@@ -72,15 +74,17 @@ contract FactoryTest is BaseSetup {
         assertEq(factory.getFeeToken(), s_token);
     }
 
-    function testAirdropTime() public {
-    }
-
     function testCreateNewAirdrop() public fromAlice {
         IERC20 factoryFeeToken = IERC20(s_token);
         vm.recordLogs();
         vm.startPrank(alice);
         factoryFeeToken.approve(address(factory), factory.getFee());
-        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        factory.createNewAirdrop(
+            s_droppedToken,
+            AIRDROP_TIME,
+            REGISTRATION_FEE,
+            LOGO_URL
+        );
         vm.stopPrank();
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 5);
@@ -89,6 +93,7 @@ contract FactoryTest is BaseSetup {
         assertEq(entries[4].topics[0], keccak256("ContractDeployed(address)"));
         IAirdrop airdrop = IAirdrop(factory.getContract(0));
         assertEq(airdrop.owner(), alice);
+        assertEq(airdrop.getAirdropTime(), block.timestamp + 14 days);
         assertEq(factory.getNumberOfAirdrops(), 1);
     }
 
@@ -96,13 +101,28 @@ contract FactoryTest is BaseSetup {
         IERC20 factoryFeeToken = IERC20(s_token);
         vm.startPrank(alice);
         factoryFeeToken.approve(address(factory), factory.getFee());
-        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        factory.createNewAirdrop(
+            s_droppedToken,
+            AIRDROP_TIME,
+            REGISTRATION_FEE,
+            LOGO_URL
+        );
         vm.stopPrank();
         vm.startPrank(bob);
         factoryFeeToken.approve(address(factory), factory.getFee() * 2);
-        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        factory.createNewAirdrop(
+            s_droppedToken,
+            AIRDROP_TIME,
+            REGISTRATION_FEE,
+            LOGO_URL
+        );
         vm.expectRevert();
-        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        factory.createNewAirdrop(
+            s_droppedToken,
+            AIRDROP_TIME,
+            REGISTRATION_FEE,
+            LOGO_URL
+        );
         vm.stopPrank();
     }
 
@@ -110,7 +130,12 @@ contract FactoryTest is BaseSetup {
         IERC20 factoryFeeToken = IERC20(s_token);
         vm.startPrank(alice);
         factoryFeeToken.approve(address(factory), factory.getFee());
-        factory.createNewAirdrop(s_droppedToken, AIRDROP_TIME, REGISTRATION_FEE, LOGO_URL);
+        factory.createNewAirdrop(
+            s_droppedToken,
+            AIRDROP_TIME,
+            REGISTRATION_FEE,
+            LOGO_URL
+        );
         vm.stopPrank();
         IAirdrop airdrop = IAirdrop(factory.getContract(0));
         IERC20 dropped = IERC20(s_droppedToken);

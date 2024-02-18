@@ -9,7 +9,7 @@ import {DeployAirdrop} from "../../script/deployAirdrop.s.sol";
 contract AirdropTest is BaseSetup {
     Airdrop airdrop;
     uint256 public constant TOKEN_AMOUNT = 12 ether;
-    uint256 public constant STARTING_BALANCE = 3 ether;    
+    uint256 public constant STARTING_BALANCE = 3 ether;
     uint256 public constant MINIMUM_FEE = 1 ether;
 
     function setUp() external {
@@ -17,7 +17,7 @@ contract AirdropTest is BaseSetup {
         airdrop = deployAirdrop.run();
         vm.deal(alice, STARTING_BALANCE);
         vm.deal(bob, STARTING_BALANCE);
-        vm.deal(mallory, STARTING_BALANCE);        
+        vm.deal(mallory, STARTING_BALANCE);
     }
 
     function testAirdropTime() public {
@@ -74,7 +74,7 @@ contract AirdropTest is BaseSetup {
         uint256 ownerInitialBalance = address(this).balance;
         vm.prank(address(this));
         airdrop.withdrawPaidFees();
-        assertEq(address(this).balance - ownerInitialBalance, STARTING_BALANCE);        
+        assertEq(address(this).balance - ownerInitialBalance, STARTING_BALANCE);
     }
 
     // Have these functions to receive ether when withdrawing
@@ -98,9 +98,9 @@ contract AirdropTest is BaseSetup {
         vm.stopBroadcast();
         vm.prank(bob);
         airdrop.sendAirdrop();
-        assertEq(token.balanceOf(alice), 3 ether);     
-        assertEq(token.balanceOf(bob), 6 ether);     
-        assertEq(token.balanceOf(mallory), 9 ether);     
+        assertEq(token.balanceOf(alice), 3 ether);
+        assertEq(token.balanceOf(bob), 6 ether);
+        assertEq(token.balanceOf(mallory), 9 ether);
     }
 
     function testWithdrawBeforeAirdropSent() public funded {
@@ -120,11 +120,14 @@ contract AirdropTest is BaseSetup {
         vm.stopBroadcast();
         vm.prank(bob);
         airdrop.sendAirdrop();
-        assertEq(token.balanceOf(address(airdrop)), 0.1 ether); 
+        assertEq(token.balanceOf(address(airdrop)), 0.1 ether);
         uint256 initialTokenBalance = token.balanceOf(address(this));
         vm.prank(address(this));
         airdrop.withdrawTokens();
-        assertEq(token.balanceOf(address(this)) - initialTokenBalance, 0.1 ether);
+        assertEq(
+            token.balanceOf(address(this)) - initialTokenBalance,
+            0.1 ether
+        );
     }
 
     function testRegistrationFee() public {

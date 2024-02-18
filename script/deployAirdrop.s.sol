@@ -7,10 +7,14 @@ import {Airdrop} from "../src/airdrop.sol";
 import {HelperConfig} from "./helperConfig.s.sol";
 
 contract DeployAirdrop is Script {
-
     function run() external returns (Airdrop) {
         HelperConfig helperConfig = new HelperConfig();
-        (address token, uint128 airdropTime, uint256 registrationFee,) = helperConfig.activeNetworkConfig();
+        (
+            address token,
+            uint128 airdropTime,
+            uint256 registrationFee,
+
+        ) = helperConfig.activeNetworkConfig();
         vm.startBroadcast();
         Airdrop airdrop = new Airdrop(
             msg.sender,
